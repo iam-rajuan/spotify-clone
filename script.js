@@ -48,6 +48,7 @@ async function main(){
     console.log(songs);
     var audio = new Audio(songs[0]);
     audio.play();
+    playMusic(songs[0])
     
 }
 
