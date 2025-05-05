@@ -1,7 +1,22 @@
 let currentSong = new Audio();
 
+function secondsToMinutesSeconds(seconds) {
+  if (isNaN(seconds) || seconds < 0) {
+      return "00:00";
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+
+  return `${formattedMinutes}:${formattedSeconds}`;
+}
 
 
+
+//get all songs function
 async function getSongs() {
   let a = await fetch("http://127.0.0.1:5500/songs");
   let response = await a.text();
@@ -17,16 +32,11 @@ async function getSongs() {
       songs.push(element.href.split("/songs/")[1]);
     }
   }
-  return songs;
-}
 
-async function main() {
-  //get all songs
-  let songs = await getSongs();
-  // console.log(songs);
 
-  //show all the songs of playlist
-  let songUL = document
+
+    //show all the songs of playlist
+    let songUL = document
     .querySelector(".songList")
     .getElementsByTagName("ul")[0];
   for (const song of songs) {
@@ -45,7 +55,6 @@ async function main() {
                         </li>`;
   }
 
-
   //event listener for all song
   Array.from(
     document.querySelector(".songList").getElementsByTagName("li")
@@ -55,17 +64,62 @@ async function main() {
     });
   });
 
-  // audio.addEventListener("loadeddata", () => {
-  //   let duration = audio.duration;
-  //   console.log(duration);
-  // });
-  return songs
+
+
+  return songs;
 }
-    
-const playMusic = (track)=>{
+
+
+//play music Function
+const playMusic = (track, pause=false) => {
   // var audio = new Audio('/songs/' + track);
-  currentSong.src = "/songs/" + track
+  currentSong.src = "/songs/" + track;
+  if (!pause) {
+    currentSong.play()
+    play.src = "img/pause.svg"
+}
+
   currentSong.play();
+  play.src = "img/play.svg"
+  document.querySelector(".songinfo").innerHTML = track
+  document.querySelector(".songtime").innerHTML = "00:00 / 00:00 "
+
+};
+
+
+
+//main function
+async function main() {
+  //get all songs
+  let songs = await getSongs();
+  // console.log(songs);
+  playMusic(songs[0])
+  
+
+
+
+  play.addEventListener("click", ()=>{
+    if (currentSong.paused) {
+      currentSong.play()
+      play.src = "img/pause.svg"
+    }else{
+      currentSong.pause();
+      play.src = "img/play.svg"
+    }
+  })
+
+
+  currentSong.addEventListener("timeupdate", ()=>{
+    document.querySelector(".songtime").innerHTML = `${secondsToMinutesSeconds(currentSong.currentTime)} / ${secondsToMinutesSeconds(currentSong.duration)}`
+    document.querySelector(".circle").style.left = (currentSong.currentTime / currentSong.duration) * 100 + "%";
+  })
+
+
+
 
 }
+
+
+
+//run the main function
 main();
